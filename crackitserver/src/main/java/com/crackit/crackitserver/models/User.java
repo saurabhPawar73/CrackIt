@@ -5,14 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "users")
-public class User
+public class User implements UserDetails
 {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,6 +46,27 @@ public class User
         return username;
     }
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isUserEnabled;
+    }
+
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -60,6 +85,17 @@ public class User
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+
+        Set<Authority> authorities= new HashSet<>();
+        this.userRoles.forEach(user_role -> {
+            authorities.add(new Authority(user_role.getRole().getRoleName()));
+        });
+
+        return null;
     }
 
     public String getPassword() {
